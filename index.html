@@ -1,12 +1,168 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index en rama carlos</title>
+  <meta charset="UTF-8">
+  <title>Juego de la Culebrita</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #222;
+      color: white;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    canvas {
+      background-color: #111;
+      border: 3px solid white;
+      margin-top: 10px;
+    }
+
+    #puntos {
+      font-size: 22px;
+      margin: 10px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Bienvenido a la rama de carlos <strong>carlos</strong></h1>
-    <p>Este archivo <code>index.html</code> se creó y comprometió en la rama <strong>carlos</strong>.</p>
+
+  <h1>Juego de la Culebrita</h1>
+  <div id="puntos">Puntos: 0</div>
+
+  <canvas id="juego" width="400" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById("juego");
+    const ctx = canvas.getContext("2d");
+    const puntosTexto = document.getElementById("puntos");
+
+    const tamaño = 20;
+
+    let culebra = [
+      { x: 200, y: 200 }
+    ];
+
+    let comida = {
+      x: 100,
+      y: 100
+    };
+
+    let direccion = "derecha";
+    let puntos = 0;
+
+    document.addEventListener("keydown", cambiarDireccion);
+
+    function cambiarDireccion(evento) {
+      if (evento.key === "ArrowUp" && direccion !== "abajo") {
+        direccion = "arriba";
+      } else if (evento.key === "ArrowDown" && direccion !== "arriba") {
+        direccion = "abajo";
+      } else if (evento.key === "ArrowLeft" && direccion !== "derecha") {
+        direccion = "izquierda";
+      } else if (evento.key === "ArrowRight" && direccion !== "izquierda") {
+        direccion = "derecha";
+      }
+    }
+
+    function dibujarJuego() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      moverCulebra();
+
+      if (chocoConPared() || chocoConEllaMisma()) {
+        alert("Perdiste. Puntos: " + puntos);
+        reiniciarJuego();
+        return;
+      }
+
+      dibujarComida();
+      dibujarCulebra();
+
+      puntosTexto.textContent = "Puntos: " + puntos;
+    }
+
+    function moverCulebra() {
+      let cabeza = {
+        x: culebra[0].x,
+        y: culebra[0].y
+      };
+
+      if (direccion === "arriba") cabeza.y -= tamaño;
+      if (direccion === "abajo") cabeza.y += tamaño;
+      if (direccion === "izquierda") cabeza.x -= tamaño;
+      if (direccion === "derecha") cabeza.x += tamaño;
+
+      culebra.unshift(cabeza);
+
+      if (cabeza.x === comida.x && cabeza.y === comida.y) {
+        puntos++;
+        crearComida();
+      } else {
+        culebra.pop();
+      }
+    }
+
+    function dibujarCulebra() {
+      ctx.fillStyle = "lime";
+
+      for (let parte of culebra) {
+        ctx.fillRect(parte.x, parte.y, tamaño, tamaño);
+      }
+    }
+
+    function dibujarComida() {
+      ctx.fillStyle = "red";
+      ctx.fillRect(comida.x, comida.y, tamaño, tamaño);
+    }
+
+    function crearComida() {
+      comida.x = Math.floor(Math.random() * 20) * tamaño;
+      comida.y = Math.floor(Math.random() * 20) * tamaño;
+    }
+
+    function chocoConPared() {
+      let cabeza = culebra[0];
+
+      return (
+        cabeza.x < 0 ||
+        cabeza.x >= canvas.width ||
+        cabeza.y < 0 ||
+        cabeza.y >= canvas.height
+      );
+    }
+
+    function chocoConEllaMisma() {
+      let cabeza = culebra[0];
+
+      for (let i = 1; i < culebra.length; i++) {
+        if (cabeza.x === culebra[i].x && cabeza.y === culebra[i].y) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    function reiniciarJuego() {
+      culebra = [
+        { x: 200, y: 200 }
+      ];
+
+      comida = {
+        x: 100,
+        y: 100
+      };
+
+      direccion = "derecha";
+      puntos = 0;
+    }
+
+    setInterval(dibujarJuego, 150);
+  </script>
+
 </body>
 </html>
